@@ -1,5 +1,9 @@
 export class GameEngine {
-  start(gameId: string) {
-    return `Game ${gameId} initialized`
+  enter(world: string, age: number) {
+    return age < 10
+      ? `Magical ${world}`
+      : age < 18
+      ? `Skill-based ${world}`
+      : `Strategic ${world}`
   }
 }
