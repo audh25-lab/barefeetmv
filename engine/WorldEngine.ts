@@ -166,6 +166,7 @@ export class WorldEngine {
   }
 
   animate = () => {
+
     requestAnimationFrame(this.animate)
     const dt = this.clock.getDelta()
 
@@ -173,7 +174,7 @@ export class WorldEngine {
     this.companion.update()
     this.rig.animate(this.companion.emotion)
     this.city.grow(this.learner.state.mastery)
-
+    this.historyScenes.forEach(s => s.update(dt))
     this.renderer.render(this.scene, this.camera)
   }
 }
