@@ -17,8 +17,8 @@ export default function AdaptiveSurface() {
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100vh",
+        position: "absolute",
+        inset: 0,
         background: `radial-gradient(circle,
           rgba(0,229,255,${state.glow}) 0%,
           #001 70%)`,
