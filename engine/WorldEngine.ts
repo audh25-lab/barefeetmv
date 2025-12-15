@@ -1,15 +1,13 @@
 import * as THREE from "three"
 
-/* ============================================================
+/* =========================
    TYPES
-============================================================ */
+========================= */
+type Intent = "explore" | "play" | "rest"
 
-export type Intent = "explore" | "play" | "rest"
-
-/* ============================================================
+/* =========================
    LEARNER PROFILE
-============================================================ */
-
+========================= */
 export class LearnerProfile {
   state = {
     age: 6,
@@ -23,17 +21,14 @@ export class LearnerProfile {
       this.state.curiosity += 0.05
       this.state.mastery += 0.02
     }
-    if (event === "play") {
-      this.state.curiosity += 0.02
-    }
+    if (event === "play") this.state.curiosity += 0.02
     this.state.lastActive = Date.now()
   }
 }
 
-/* ============================================================
-   COMPANION AVATAR (VISUAL)
-============================================================ */
-
+/* =========================
+   COMPANION AVATAR
+========================= */
 export class CompanionAvatar3D {
   mesh: THREE.Mesh
   emotion = 0.5
@@ -54,29 +49,27 @@ export class CompanionAvatar3D {
     if (intent === "rest") this.emotion -= 0.05
   }
 
-  update(elapsed: number) {
+  update() {
     this.mesh.position.y =
-      1.4 + Math.sin(elapsed * 0.002) * 0.05
+      1.4 + Math.sin(Date.now() * 0.002) * 0.05
   }
 }
 
-/* ============================================================
+/* =========================
    AVATAR RIG
-============================================================ */
-
+========================= */
 export class AvatarRig {
   root = new THREE.Group()
 
-  animate(emotion: number, elapsed: number) {
+  animate(emotion: number) {
     this.root.rotation.y =
-      Math.sin(elapsed * 0.001) * emotion * 0.1
+      Math.sin(Date.now() * 0.001) * emotion * 0.1
   }
 }
 
-/* ============================================================
-   MALDIVES OCEAN
-============================================================ */
-
+/* =========================
+   OCEAN
+========================= */
 export class MaldivesOcean {
   mesh: THREE.Mesh
   time = 0
@@ -107,42 +100,38 @@ export class MaldivesOcean {
 
   update(dt: number) {
     this.time += dt
-    ;(this.mesh.material as THREE.ShaderMaterial).uniforms.time.value =
-      this.time
+    ;(this.mesh.material as THREE.ShaderMaterial)
+      .uniforms.time.value = this.time
   }
 }
 
-/* ============================================================
-   HISTORY / CITY
-============================================================ */
-
+/* =========================
+   CITY
+========================= */
 export function generateCity(
   scene: THREE.Scene,
   type: "roman" | "china"
 ) {
-  const geo = new THREE.BoxGeometry(1, 1, 1)
-  const mat = new THREE.MeshStandardMaterial({
-    color: type === "roman" ? "#e0d8c3" : "#aa3333"
-  })
-  const mesh = new THREE.Mesh(geo, mat)
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshStandardMaterial({
+      color: type === "roman" ? "#e0d8c3" : "#aa3333"
+    })
+  )
   mesh.position.set(type === "roman" ? 2 : -2, 0.5, -2)
   scene.add(mesh)
 }
 
 export class CityGrowth {
   constructor(private scene: THREE.Scene) {}
-
   grow(level: number) {
-    this.scene.scale.setScalar(
-      Math.min(1 + level * 0.05, 1.5)
-    )
+    this.scene.scale.setScalar(1 + level * 0.05)
   }
 }
 
-/* ============================================================
-   CURRICULUM GRAPH
-============================================================ */
-
+/* =========================
+   CURRICULUM
+========================= */
 export class CurriculumGraph {
   update(mastery: number) {
     if (mastery < 0.3) return "Nature"
@@ -151,10 +140,9 @@ export class CurriculumGraph {
   }
 }
 
-/* ============================================================
-   VOICE → INTENT
-============================================================ */
-
+/* =========================
+   VOICE
+========================= */
 class VoiceIntentEngine {
   recognition: any
 
@@ -172,23 +160,17 @@ class VoiceIntentEngine {
     this.recognition.onresult = (e: any) => {
       const text =
         e.results[e.results.length - 1][0].transcript.toLowerCase()
-
       if (text.includes("rest")) onIntent("rest")
       else if (text.includes("play")) onIntent("play")
       else onIntent("explore")
     }
     this.recognition.start()
   }
-
-  stop() {
-    this.recognition?.stop()
-  }
 }
 
-/* ============================================================
-   WORLD ENGINE (FINAL)
-============================================================ */
-
+/* =========================
+   WORLD ENGINE
+========================= */
 export class WorldEngine {
   scene = new THREE.Scene()
   camera: THREE.PerspectiveCamera
@@ -217,24 +199,14 @@ export class WorldEngine {
       antialias: true,
       alpha: true
     })
-    this.renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio, 2)
-    )
-    this.renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    )
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
     container.appendChild(this.renderer.domElement)
 
-    window.addEventListener("resize", this.onResize)
-
-    /* Lighting */
     this.scene.add(new THREE.AmbientLight("#88ccee", 0.6))
     const sun = new THREE.DirectionalLight("#fff", 1.1)
     sun.position.set(5, 10, 5)
     this.scene.add(sun)
 
-    /* World */
     this.scene.add(this.ocean.mesh)
     this.scene.add(this.companion.mesh)
     this.scene.add(this.rig.root)
@@ -243,29 +215,13 @@ export class WorldEngine {
     generateCity(this.scene, "china")
     this.city = new CityGrowth(this.scene)
 
-    /* Voice */
-    this.voice = new VoiceIntentEngine(i =>
-      this.handleIntent(i)
-    )
-
+    this.voice = new VoiceIntentEngine(i => this.handleIntent(i))
     this.animate()
   }
 
-  onResize = () => {
-    this.camera.aspect =
-      window.innerWidth / window.innerHeight
-    this.camera.updateProjectionMatrix()
-    this.renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    )
-  }
-
-  async handleIntent(intent: Intent) {
+  handleIntent(intent: Intent) {
     this.companion.react(intent)
-    this.learner.update(
-      intent === "rest" ? "rest" : "learn"
-    )
+    this.learner.update(intent === "rest" ? "rest" : "learn")
   }
 
   animate = () => {
@@ -273,11 +229,9 @@ export class WorldEngine {
     requestAnimationFrame(this.animate)
 
     const dt = this.clock.getDelta()
-    const elapsed = performance.now()
-
     this.ocean.update(dt)
-    this.companion.update(elapsed)
-    this.rig.animate(this.companion.emotion, elapsed)
+    this.companion.update()
+    this.rig.animate(this.companion.emotion)
     this.city.grow(this.learner.state.mastery)
 
     this.renderer.render(this.scene, this.camera)
@@ -285,8 +239,6 @@ export class WorldEngine {
 
   destroy() {
     this.running = false
-    this.voice?.stop()
-    window.removeEventListener("resize", this.onResize)
     this.renderer.dispose()
   }
 }
