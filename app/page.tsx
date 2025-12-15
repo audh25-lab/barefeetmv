@@ -1,21 +1,23 @@
 "use client"
 
-import { setUserState } from "../lib/state"
+import { useEffect, useRef } from "react"
+import { WorldEngine } from "@/engine/WorldEngine"
+import AdaptiveSurface from "@/ui-postscreen/AdaptiveSurface"
+import { PresenceUI } from "@/ui-postscreen/PresenceUI"
 
 export default function Home() {
-  function start(age: number) {
-    setUserState({ age, language: "en" })
-    window.location.href = "/play"
-  }
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    new WorldEngine(ref.current)
+  }, [])
 
   return (
-    <main>
-      <h1>BarefeetMV 👣</h1>
-      <p>Choose your age to begin:</p>
-
-      <button onClick={() => start(4)}>Ages 3–5</button>
-      <br /><br />
-      <button onClick={() => start(7)}>Ages 6–9</button>
-    </main>
+    <>
+      <AdaptiveSurface />
+      <div ref={ref} style={{ position: "absolute", inset: 0 }} />
+      <PresenceUI resonance={0.6} />
+    </>
   )
 }
