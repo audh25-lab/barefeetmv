@@ -1,11 +1,9 @@
 import { XRWorld } from "./XRWorld"
 
 export class XRBridge {
-  world = new XRWorld()
-
   enter() {
-    return this.world.enableXR()
+    return "xr" in navigator
       ? "Entered XR World"
-      : "Fallback to Living Screen Mode"
+      : "Fallback to Screen Mode"
   }
 }
