@@ -1,21 +1,17 @@
-export type Emotion = "joy" | "curiosity" | "focus" | "calm" | "bored"
+import { EmotionalModel } from "./EmotionalModel"
 
-export class EmotionalModel {
-  private state: Record<Emotion, number> = {
-    joy: 0.7,
-    curiosity: 0.8,
-    focus: 0.6,
-    calm: 0.5,
-    bored: 0.1
-  }
+export default class LearningAdapter {
+  constructor(private emotion: EmotionalModel) {}
 
-  update(event: string) {
-    if (event === "play") this.state.joy += 0.05
-    if (event === "learn") this.state.focus += 0.05
-    if (event === "repeat") this.state.bored += 0.03
-  }
+  adapt(subject: string, age: number) {
+    if (age < 5) {
+      return `Let's play and learn ${subject} with fun sounds 🎵`
+    }
 
-  snapshot() {
-    return this.state
+    if (age < 9) {
+      return `Let's explore ${subject} with stories and puzzles 🧩`
+    }
+
+    return `Let's study ${subject} in a smart and creative way ✨`
   }
 }
