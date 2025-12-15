@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # dependencies
 node_modules/
 
@@ -12,3 +13,6 @@ yarn-error.log*
 
 # env
 .env*
+=======
+node_modules
+>>>>>>> be57930 (git push origin main)
