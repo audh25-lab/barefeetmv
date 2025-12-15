@@ -12,12 +12,12 @@ export default function Home() {
   useEffect(() => {
     if (!mountRef.current || engineRef.current) return
 
-    engineRef.current = new WorldEngine(mountRef.current)
+    const engine = new WorldEngine(mountRef.current)
+    engineRef.current = engine
 
     return () => {
-      // Safe cleanup for Next.js 14 strict mode
+      engine.destroy()
       engineRef.current = null
-      mountRef.current?.replaceChildren()
     }
   }, [])
 
@@ -32,7 +32,8 @@ export default function Home() {
         style={{
           position: "absolute",
           inset: 0,
-          overflow: "hidden"
+          overflow: "hidden",
+          touchAction: "none" // 🔥 important for mobile gestures
         }}
       />
 
