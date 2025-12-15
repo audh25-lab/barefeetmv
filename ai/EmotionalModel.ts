@@ -1,21 +1,17 @@
-export type Emotion = "joy" | "curiosity" | "focus" | "calm" | "bored"
-
 export class EmotionalModel {
-  private state: Record<Emotion, number> = {
-    joy: 0.7,
-    curiosity: 0.8,
-    focus: 0.6,
-    calm: 0.5,
-    bored: 0.1
-  }
+  private state: string = "neutral"
 
   update(event: string) {
-    if (event === "play") this.state.joy += 0.05
-    if (event === "learn") this.state.focus += 0.05
-    if (event === "repeat") this.state.bored += 0.03
+    if (event.includes("happy")) this.state = "happy"
+    else if (event.includes("sad")) this.state = "sad"
+    else if (event.includes("excited")) this.state = "excited"
+    else this.state = "neutral"
   }
 
   snapshot() {
-    return this.state
+    return {
+      mood: this.state,
+      timestamp: Date.now()
+    }
   }
 }
