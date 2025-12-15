@@ -1,6 +1,6 @@
 export const metadata = {
   title: "BarefeetMV",
-  description: "BarefeetMV",
+  description: "BarefeetMV"
 }
 
 export default function RootLayout({
