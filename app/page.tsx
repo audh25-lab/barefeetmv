@@ -6,17 +6,17 @@ import AdaptiveSurface from "@/ui-postscreen/AdaptiveSurface"
 import { PresenceUI } from "@/ui-postscreen/PresenceUI"
 
 export default function Home() {
-  const ref = useRef<HTMLDivElement>(null)
+  const mount = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!ref.current) return
-    new WorldEngine(ref.current)
+    if (!mount.current) return
+    new WorldEngine(mount.current)
   }, [])
 
   return (
     <>
       <AdaptiveSurface />
-      <div ref={ref} style={{ position: "absolute", inset: 0 }} />
+      <div ref={mount} style={{ position: "absolute", inset: 0 }} />
       <PresenceUI resonance={0.6} />
     </>
   )
