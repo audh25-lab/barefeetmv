@@ -4,7 +4,7 @@ import * as THREE from "three"
    TYPES
 ============================================================ */
 
-type Intent = "explore" | "play" | "rest"
+export type Intent = "explore" | "play" | "rest"
 
 /* ============================================================
    LEARNER PROFILE
@@ -31,7 +31,7 @@ export class LearnerProfile {
 }
 
 /* ============================================================
-   COMPANION AVATAR
+   COMPANION AVATAR (VISUAL)
 ============================================================ */
 
 export class CompanionAvatar3D {
@@ -54,26 +54,27 @@ export class CompanionAvatar3D {
     if (intent === "rest") this.emotion -= 0.05
   }
 
-  update() {
+  update(elapsed: number) {
     this.mesh.position.y =
-      1.4 + Math.sin(Date.now() * 0.002) * 0.05
+      1.4 + Math.sin(elapsed * 0.002) * 0.05
   }
 }
 
 /* ============================================================
-   AVATAR RIG (LIGHTWEIGHT)
+   AVATAR RIG
 ============================================================ */
 
 export class AvatarRig {
   root = new THREE.Group()
 
-  animate(emotion: number) {
-    this.root.rotation.y = Math.sin(Date.now() * 0.001) * emotion * 0.1
+  animate(emotion: number, elapsed: number) {
+    this.root.rotation.y =
+      Math.sin(elapsed * 0.001) * emotion * 0.1
   }
 }
 
 /* ============================================================
-   OCEAN
+   MALDIVES OCEAN
 ============================================================ */
 
 export class MaldivesOcean {
@@ -112,10 +113,13 @@ export class MaldivesOcean {
 }
 
 /* ============================================================
-   CITY + HISTORY
+   HISTORY / CITY
 ============================================================ */
 
-export function generateCity(scene: THREE.Scene, type: "roman" | "china") {
+export function generateCity(
+  scene: THREE.Scene,
+  type: "roman" | "china"
+) {
   const geo = new THREE.BoxGeometry(1, 1, 1)
   const mat = new THREE.MeshStandardMaterial({
     color: type === "roman" ? "#e0d8c3" : "#aa3333"
@@ -127,13 +131,16 @@ export function generateCity(scene: THREE.Scene, type: "roman" | "china") {
 
 export class CityGrowth {
   constructor(private scene: THREE.Scene) {}
+
   grow(level: number) {
-    this.scene.scale.setScalar(1 + level * 0.05)
+    this.scene.scale.setScalar(
+      Math.min(1 + level * 0.05, 1.5)
+    )
   }
 }
 
 /* ============================================================
-   CURRICULUM
+   CURRICULUM GRAPH
 ============================================================ */
 
 export class CurriculumGraph {
@@ -163,17 +170,23 @@ class VoiceIntentEngine {
     this.recognition = new SR()
     this.recognition.continuous = true
     this.recognition.onresult = (e: any) => {
-      const text = e.results[e.results.length - 1][0].transcript.toLowerCase()
+      const text =
+        e.results[e.results.length - 1][0].transcript.toLowerCase()
+
       if (text.includes("rest")) onIntent("rest")
       else if (text.includes("play")) onIntent("play")
       else onIntent("explore")
     }
     this.recognition.start()
   }
+
+  stop() {
+    this.recognition?.stop()
+  }
 }
 
 /* ============================================================
-   WORLD ENGINE
+   WORLD ENGINE (FINAL)
 ============================================================ */
 
 export class WorldEngine {
@@ -200,15 +213,28 @@ export class WorldEngine {
     )
     this.camera.position.set(0, 2.2, 6)
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    })
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, 2)
+    )
+    this.renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    )
     container.appendChild(this.renderer.domElement)
 
+    window.addEventListener("resize", this.onResize)
+
+    /* Lighting */
     this.scene.add(new THREE.AmbientLight("#88ccee", 0.6))
     const sun = new THREE.DirectionalLight("#fff", 1.1)
     sun.position.set(5, 10, 5)
     this.scene.add(sun)
 
+    /* World */
     this.scene.add(this.ocean.mesh)
     this.scene.add(this.companion.mesh)
     this.scene.add(this.rig.root)
@@ -217,14 +243,29 @@ export class WorldEngine {
     generateCity(this.scene, "china")
     this.city = new CityGrowth(this.scene)
 
-    this.voice = new VoiceIntentEngine(i => this.handleIntent(i))
+    /* Voice */
+    this.voice = new VoiceIntentEngine(i =>
+      this.handleIntent(i)
+    )
 
     this.animate()
   }
 
+  onResize = () => {
+    this.camera.aspect =
+      window.innerWidth / window.innerHeight
+    this.camera.updateProjectionMatrix()
+    this.renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    )
+  }
+
   async handleIntent(intent: Intent) {
     this.companion.react(intent)
-    this.learner.update(intent === "rest" ? "rest" : "learn")
+    this.learner.update(
+      intent === "rest" ? "rest" : "learn"
+    )
   }
 
   animate = () => {
@@ -232,9 +273,11 @@ export class WorldEngine {
     requestAnimationFrame(this.animate)
 
     const dt = this.clock.getDelta()
+    const elapsed = performance.now()
+
     this.ocean.update(dt)
-    this.companion.update()
-    this.rig.animate(this.companion.emotion)
+    this.companion.update(elapsed)
+    this.rig.animate(this.companion.emotion, elapsed)
     this.city.grow(this.learner.state.mastery)
 
     this.renderer.render(this.scene, this.camera)
@@ -242,6 +285,8 @@ export class WorldEngine {
 
   destroy() {
     this.running = false
+    this.voice?.stop()
+    window.removeEventListener("resize", this.onResize)
     this.renderer.dispose()
   }
 }
