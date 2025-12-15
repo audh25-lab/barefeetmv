@@ -4,8 +4,8 @@ export default class LearningAdapter {
   constructor(private emotion: EmotionalModel) {}
 
   adapt(subject: string, age: number) {
-    if (age < 5) return `Learning ${subject} through play 🎈`
-    if (age < 9) return `Exploring ${subject} with stories 📘`
-    return `Understanding ${subject} creatively ✨`
+    if (age <= 5) return `Let’s play with ${subject} 🎈`
+    if (age <= 8) return `Let’s explore ${subject} together 📘`
+    return `Let’s learn ${subject} creatively ✨`
   }
 }
