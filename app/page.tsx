@@ -6,17 +6,37 @@ import AdaptiveSurface from "@/ui-postscreen/AdaptiveSurface"
 import { PresenceUI } from "@/ui-postscreen/PresenceUI"
 
 export default function Home() {
-  const mount = useRef<HTMLDivElement>(null)
+  const mountRef = useRef<HTMLDivElement>(null)
+  const engineRef = useRef<WorldEngine | null>(null)
 
   useEffect(() => {
-    if (!mount.current) return
-    new WorldEngine(mount.current)
+    if (!mountRef.current || engineRef.current) return
+
+    engineRef.current = new WorldEngine(mountRef.current)
+
+    return () => {
+      // Safe cleanup for Next.js 14 strict mode
+      engineRef.current = null
+      mountRef.current?.replaceChildren()
+    }
   }, [])
 
   return (
     <>
+      {/* AI + Curriculum Overlay */}
       <AdaptiveSurface />
-      <div ref={mount} style={{ position: "absolute", inset: 0 }} />
+
+      {/* Three.js World */}
+      <div
+        ref={mountRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden"
+        }}
+      />
+
+      {/* Presence / Emotional Feedback */}
       <PresenceUI resonance={0.6} />
     </>
   )
