@@ -32,3 +32,8 @@ export class NPC {
     }
   }
 }
+traits: Traits = {
+  intelligence: Math.random(),
+  curiosity: Math.random(),
+  resilience: Math.random()
+}
