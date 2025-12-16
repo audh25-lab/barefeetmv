@@ -12,32 +12,35 @@ export default function Home() {
   useEffect(() => {
     if (!mountRef.current || engineRef.current) return
 
-    const engine = new WorldEngine(mountRef.current)
-    engineRef.current = engine
+    engineRef.current = new WorldEngine(mountRef.current)
 
     return () => {
-      engine.destroy()
+      engineRef.current?.destroy()
       engineRef.current = null
+      mountRef.current?.replaceChildren()
     }
   }, [])
 
   return (
     <>
-      {/* AI + Curriculum Overlay */}
-      <AdaptiveSurface />
+      {/* AI / Curriculum Overlay */}
+      <div className="fade-in">
+        <AdaptiveSurface />
+      </div>
 
       {/* Three.js World */}
       <div
         ref={mountRef}
+        role="application"
+        aria-label="Interactive learning world"
         style={{
           position: "absolute",
           inset: 0,
-          overflow: "hidden",
-          touchAction: "none" // 🔥 important for mobile gestures
+          overflow: "hidden"
         }}
       />
 
-      {/* Presence / Emotional Feedback */}
+      {/* Emotional / Presence UI */}
       <PresenceUI resonance={0.6} />
     </>
   )
