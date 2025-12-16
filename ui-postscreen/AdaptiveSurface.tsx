@@ -6,9 +6,12 @@ import { AmbientField } from "./AmbientField"
 export default function AdaptiveSurface() {
   const fieldRef = useRef<AmbientField | null>(null)
   const rafRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number>(performance.now())
+
   const [state, setState] = useState({
-    glow: 0.2,
-    motion: 0
+    glow: 0.25,
+    motion: 0,
+    hue: 190
   })
 
   useEffect(() => {
@@ -17,20 +20,26 @@ export default function AdaptiveSurface() {
     const prefersReducedMotion =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
-    const loop = () => {
+    const loop = (time: number) => {
       if (!fieldRef.current) return
-      setState(fieldRef.current.state())
+
+      const dt = (time - lastTimeRef.current) / 1000
+      lastTimeRef.current = time
+
+      fieldRef.current.updateTime(dt)
+
+      // Throttle visual updates slightly for mobile
+      if (!prefersReducedMotion || time % 2 < 1) {
+        setState(fieldRef.current.state())
+      }
+
       rafRef.current = requestAnimationFrame(loop)
     }
 
-    if (!prefersReducedMotion) {
-      loop()
-    }
+    rafRef.current = requestAnimationFrame(loop)
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
       rafRef.current = null
       fieldRef.current = null
     }
@@ -39,17 +48,18 @@ export default function AdaptiveSurface() {
   return (
     <div
       aria-hidden="true"
+      role="presentation"
       style={{
         position: "absolute",
         inset: 0,
         pointerEvents: "none",
 
         background: `radial-gradient(circle,
-          rgba(0,229,255,${state.glow}) 0%,
-          #001 70%)`,
+          hsla(${state.hue}, 90%, 60%, ${state.glow}) 0%,
+          hsl(${state.hue}, 40%, 8%) 70%)`,
 
         transform: `translateY(${state.motion}px)`,
-        transition: "background 0.2s ease"
+        transition: "background 0.3s ease"
       }}
     />
   )
