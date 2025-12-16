@@ -28,7 +28,7 @@ export default function AdaptiveSurface() {
 
       fieldRef.current.updateTime(dt)
 
-      // Throttle visual updates slightly for mobile
+      // throttle visual updates on mobile
       if (!prefersReducedMotion || time % 2 < 1) {
         setState(fieldRef.current.state())
       }
