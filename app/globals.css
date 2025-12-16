@@ -1,19 +1,64 @@
-header, footer {
+/* ===============================
+   Layout Chrome
+=============================== */
+
+header,
+footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
   padding: 12px 20px;
-  background: white;
+  background: #ffffff;
+
   border-bottom: 1px solid #eee;
+
+  /* Ensure UI sits above WebGL */
+  position: relative;
+  z-index: 10;
+
+  /* iOS safe-area support */
+  padding-left: calc(20px + env(safe-area-inset-left));
+  padding-right: calc(20px + env(safe-area-inset-right));
 }
 
 footer {
   border-top: 1px solid #eee;
+  border-bottom: none;
+
   font-size: 12px;
   opacity: 0.7;
 }
+
+/* ===============================
+   Navigation
+=============================== */
 
 nav a {
   margin-left: 12px;
   text-decoration: none;
   color: #0bbcd6;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   World Canvas Safety
+=============================== */
+
+/* Prevent scroll bounce on mobile */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+  height: 100%;
+}
+
+/* Ensure Three.js canvas never blocks UI */
+canvas {
+  display: block;
 }
