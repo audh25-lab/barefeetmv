@@ -1,6 +1,51 @@
-/* ===============================
-   Layout Chrome
-=============================== */
+/* =====================================================
+   RESET & BASE
+===================================================== */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* =====================================================
+   THEME VARIABLES
+===================================================== */
+
+:root {
+  --bg: #ffffff;
+  --fg: #0b0b0b;
+  --accent: #0bbcd6;
+  --panel: #f7f7f7;
+  --border: #eaeaea;
+}
+
+[data-theme="dark"] {
+  --bg: #0b0b0b;
+  --fg: #f2f2f2;
+  --accent: #4ddcff;
+  --panel: #161616;
+  --border: #2a2a2a;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* =====================================================
+   HEADER / FOOTER
+===================================================== */
 
 header,
 footer {
@@ -9,35 +54,31 @@ footer {
   align-items: center;
 
   padding: 12px 20px;
-  background: #ffffff;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
 
-  border-bottom: 1px solid #eee;
-
-  /* Ensure UI sits above WebGL */
   position: relative;
   z-index: 10;
 
-  /* iOS safe-area support */
   padding-left: calc(20px + env(safe-area-inset-left));
   padding-right: calc(20px + env(safe-area-inset-right));
 }
 
 footer {
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border);
   border-bottom: none;
-
   font-size: 12px;
   opacity: 0.7;
 }
 
-/* ===============================
-   Navigation
-=============================== */
+/* =====================================================
+   NAV
+===================================================== */
 
 nav a {
   margin-left: 12px;
   text-decoration: none;
-  color: #0bbcd6;
+  color: var(--accent);
   font-weight: 500;
 }
 
@@ -45,20 +86,59 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* ===============================
-   World Canvas Safety
-=============================== */
+/* =====================================================
+   MOTION POLISH
+===================================================== */
 
-/* Prevent scroll bounce on mobile */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  overscroll-behavior: none;
-  height: 100%;
+.fade-in {
+  animation: fadeIn 0.6s ease-out both;
 }
 
-/* Ensure Three.js canvas never blocks UI */
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =====================================================
+   ACCESSIBILITY
+===================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Ensure canvas never blocks UI */
 canvas {
   display: block;
 }
